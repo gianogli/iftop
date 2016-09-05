@@ -71,7 +71,8 @@ int dontshowdisplay = 0;
 
 /* Barchart scales. */
 static struct {
-    int max, interval;
+    double max;
+    int interval;
 } scale[] = {
         {      64000,     10 },     /* 64 kbit/s */
         {     128000,     10 },
@@ -105,7 +106,7 @@ static float get_max_bandwidth() {
 }
 
 /* rate in bits */
-static int get_bar_length(const int rate) {
+static int get_bar_length(const double rate) {
     float l;
     if (rate <= 0)
         return 0;
