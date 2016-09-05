@@ -116,7 +116,8 @@ static int get_bar_length(const double rate) {
     if (rate > scale[rateidx].max) {
       wantbiggerrate = 1;
       if(! rateidx_init) {
-	while(rate > scale[rateidx_init++].max) {
+	while(rate > scale[rateidx_init].max) {
+          rateidx_init++;
 	}
 	rateidx = rateidx_init;
       }
