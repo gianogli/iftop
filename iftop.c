@@ -713,7 +713,7 @@ void packet_init() {
     if(have_hw_addr) {
       fprintf(stderr, "MAC address is:");
       for (i = 0; i < 6; ++i)
-	fprintf(stderr, "%c%02x", i ? ':' : ' ', (unsigned int)if_hw_addr[i]);
+	fprintf(stderr, "%c%02x", i ? ':' : ' ', (unsigned char)if_hw_addr[i]);
       fprintf(stderr, "\n");
     }
     
