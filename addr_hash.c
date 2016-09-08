@@ -88,7 +88,7 @@ void delete_key(void* key) {
  */
 hash_type* addr_hash_create() {
     hash_type* hash_table;
-    hash_table = xcalloc(hash_table_size, sizeof *hash_table);
+    hash_table = xcalloc(1, sizeof *hash_table);
     hash_table->size = hash_table_size;
     hash_table->compare = &compare;
     hash_table->hash = &hash;
