@@ -11,6 +11,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#define MAX_NETWORK_FILTER_NUM 16
+#define NETWORK_FILTER_DELIMITERS " ,;"
 
 typedef enum {
   OPTION_PORTS_OFF,
@@ -78,8 +80,8 @@ typedef struct {
 
     /* Cross network filter */
     int netfilter;
-    struct in_addr netfilternet;
-    struct in_addr netfiltermask;
+    struct in_addr netfilternet[MAX_NETWORK_FILTER_NUM];
+    struct in_addr netfiltermask[MAX_NETWORK_FILTER_NUM];
 
     int netfilter6;
     struct in6_addr netfilter6net;

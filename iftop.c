@@ -83,9 +83,6 @@ static void finish(int sig) {
     foad = sig;
 }
 
-
-
-
 /* Only need ethernet (plus optional 4 byte VLAN) and IP headers (48) + first 2
  * bytes of tcp/udp header */
 /* Increase with a further 20 to account for IPv6 header length.  */
@@ -172,9 +169,12 @@ void tick(int print) {
 }
 
 int in_filter_net(struct in_addr addr) {
-    int ret;
-    ret = ((addr.s_addr & options.netfiltermask.s_addr) == options.netfilternet.s_addr);
-    return ret;
+    int ret, i;
+    for (i=0; i < options.netfilter; i++) {
+        ret = ((addr.s_addr & options.netfiltermask[i].s_addr) == options.netfilternet[i].s_addr);
+        if (ret) return 1;
+    }
+    return 0;
 }
 
 static int __inline__ ip_addr_match(struct in_addr addr) {

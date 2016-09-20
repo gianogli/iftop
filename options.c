@@ -116,6 +116,7 @@ static char *get_first_interface(void) {
 
 void options_set_defaults() {
     char *s;
+    int i;
     /* Should go through the list of interfaces, and find the first one which
      * is up and is not lo or dummy*. */
     options.interface = get_first_interface();
@@ -124,8 +125,10 @@ void options_set_defaults() {
 
     options.filtercode = NULL;
     options.netfilter = 0;
-    inet_aton("10.0.1.0", &options.netfilternet);
-    inet_aton("255.255.255.0", &options.netfiltermask);
+    for(i=0; i < MAX_NETWORK_FILTER_NUM; i++) {
+        inet_aton("0.0.0.0", &(options.netfilternet[i]));
+        inet_aton("0.0.0.0", &(options.netfiltermask[i]));
+    }
     options.netfilter6 = 0;
     inet_pton(AF_INET6, "fe80::", &options.netfilter6net);	/* Link-local */
     inet_pton(AF_INET6, "ffff::", &options.netfilter6mask);
@@ -192,7 +195,8 @@ static void usage(FILE *fp) {
 "   -i interface        listen on named interface\n"
 "   -f filter code      use filter code to select packets to count\n"
 "                       (default: none, but only IP packets are counted)\n"
-"   -F net/mask         show traffic flows in/out of IPv4 network\n"
+"   -F net/mask         show traffic flows in/out of IPv4 networks\n"
+"                         (max %i networks using \"%s\" delimiters)\n"
 "   -G net6/mask6       show traffic flows in/out of IPv6 network\n"
 "   -l                  display and count link-local IPv6 traffic (default: off)\n"
 "   -P                  show ports as well as hosts\n"
@@ -212,7 +216,7 @@ static void usage(FILE *fp) {
 "   -L num              number of lines to print\n"
 "\n"
 "iftop, version " PACKAGE_VERSION "\n"
-"copyright (c) 2002 Paul Warren <pdw@ex-parrot.com> and contributors\n"
+"copyright (c) 2002 Paul Warren <pdw@ex-parrot.com> and contributors\n", MAX_NETWORK_FILTER_NUM, NETWORK_FILTER_DELIMITERS
             );
 }
 
@@ -417,21 +421,31 @@ int options_config_get_net_filter() {
     char* s;
     s = config_get_string("net-filter");
     if(s) {
-        char* mask;
-
         options.netfilter = 0;
+        char* mask;
+        char* token;
 
-        mask = strchr(s, '/');
-        if (mask == NULL) {
+        token = strtok(s, NETWORK_FILTER_DELIMITERS);
+
+        if (token == NULL) {
             fprintf(stderr, "Could not parse net/mask: %s\n", s);
             return 0;
         }
-        *mask = '\0';
-        mask++;
-        if (inet_aton(s, &options.netfilternet) == 0) {
-            fprintf(stderr, "Invalid network address: %s\n", s);
-            return 0;
-        }
+
+        while(token != NULL && options.netfilter < MAX_NETWORK_FILTER_NUM) {
+            mask = strchr(token, '/');
+            if (mask == NULL) {
+                fprintf(stderr, "Could not parse net/mask: %s\n", s);
+                return 0;
+            }
+            *mask = '\0';
+            mask++;
+
+            if (inet_aton(token, &(options.netfilternet[options.netfilter])) == 0) {
+                fprintf(stderr, "Invalid network address: %s\n", token);
+                return 0;
+            }
+
         /* Accept a netmask like /24 or /255.255.255.0. */
         if (mask[strspn(mask, "0123456789")] == '\0') {
             /* Whole string is numeric */
@@ -445,27 +459,30 @@ int options_config_get_net_filter() {
                   /* This needs to be special cased, although I don't fully 
                    * understand why -pdw 
                    */
-                  options.netfiltermask.s_addr = htonl(0xffffffffl);
+                  options.netfiltermask[options.netfilter].s_addr = htonl(0xffffffffl);
                 }
                 else {
                   u_int32_t mm = 0xffffffffl;
                   mm >>= n;
-                  options.netfiltermask.s_addr = htonl(~mm);
+                  options.netfiltermask[options.netfilter].s_addr = htonl(~mm);
                 }
             }
-            options.netfilter = 1;
         } 
         else {
-            if (inet_aton(mask, &options.netfiltermask) != 0)
-                options.netfilter = 1;
-            else {
+            if (inet_aton(mask, &(options.netfiltermask[options.netfilter])) == 0) {
                 fprintf(stderr, "Invalid netmask: %s\n", s);
                 return 0;
             }
         }
-        options.netfilternet.s_addr = options.netfilternet.s_addr & options.netfiltermask.s_addr;
-        return 1;
+        options.netfilternet[options.netfilter].s_addr = options.netfilternet[options.netfilter].s_addr & options.netfiltermask[options.netfilter].s_addr;
+            options.netfilter++;
+
+            token = strtok(NULL, NETWORK_FILTER_DELIMITERS);
+        }
+
+        if (options.netfilter > 0) return 1;
     }
+
     return 0;
 }
 
