@@ -217,7 +217,16 @@ void make_screen_list() {
         /* Don't make a new, sorted screen list if order is frozen
          */
         if(!options.freezeorder) {
-            sorted_list_insert(&screen_list, line);
+            if(options.no_curses)
+               if(!options.num_lines_no_curses)
+                   sorted_list_insert(&screen_list, line);
+               else
+                   limited_sorted_list_insert(&screen_list, line, options.num_lines_no_curses);
+            else
+               if(!options.num_lines_curses)
+                   sorted_list_insert(&screen_list, line);
+               else
+                   limited_sorted_list_insert(&screen_list, line, options.num_lines_curses);
         } 
 	 
     }

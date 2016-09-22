@@ -7,6 +7,39 @@
 #include <stdio.h>
 #include "sorted_list.h"
 #include "iftop.h"
+#include <assert.h>
+
+void limited_sorted_list_insert(sorted_list_type* list, void* item, int max_list_lenght) {
+    sorted_list_node *node, *p;
+    int i = 0;
+
+    p = &(list->root);
+
+    while (i < max_list_lenght && p->next != NULL && list->compare(item, p->next->data) > 0) {
+        i++;
+        p = p->next;
+    }
+
+    if (i < max_list_lenght) {
+        node = xmalloc(sizeof *node);
+        node->next = p->next;
+        node->data = item;
+        p->next = node;
+        i++;
+        p = node;
+    }
+
+    while (i < max_list_lenght && p->next != NULL) {
+        i++;
+        p = p->next;
+    }
+
+    if (p->next != NULL) {
+        assert((p->next)->next == NULL);
+        free(p->next);
+        p->next = NULL;
+    }
+}
 
 
 void sorted_list_insert(sorted_list_type* list, void* item) {
@@ -24,7 +57,6 @@ void sorted_list_insert(sorted_list_type* list, void* item) {
     node->data = item;
     p->next = node;
 }
-
 
 sorted_list_node* sorted_list_next_item(sorted_list_type* list, sorted_list_node* prev) {
     if(prev == NULL) {

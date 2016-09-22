@@ -60,7 +60,8 @@ typedef struct {
     int showhelp;
     int timed_output;
     int no_curses;
-    int num_lines;
+    int num_lines_curses;
+    int num_lines_no_curses;
     int bandwidth_in_bytes;
     option_sort_t sort;
 

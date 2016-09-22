@@ -17,6 +17,7 @@ typedef struct {
 } sorted_list_type;
 
 void sorted_list_initialise(sorted_list_type* list);
+void limited_sorted_list_insert(sorted_list_type* list, void* item, int max_list_lenght);
 void sorted_list_insert(sorted_list_type* list, void* item);
 sorted_list_node* sorted_list_next_item(sorted_list_type* list, sorted_list_node* prev);
 void sorted_list_destroy(sorted_list_type* list);

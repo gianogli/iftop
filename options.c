@@ -160,7 +160,8 @@ void options_set_defaults() {
     options.bar_interval = 1;
     options.timed_output = 0;
     options.no_curses = 0;
-    options.num_lines = 10;
+    options.num_lines_curses = 50;
+    options.num_lines_no_curses = 10;
 
     /* Figure out the name for the config file */
     s = getenv("HOME");
@@ -203,6 +204,9 @@ static void usage(FILE *fp) {
 "   -m limit            sets the upper limit for the bandwidth scale\n"
 "   -c config file      specifies an alternative configuration file\n"
 "   -t                  use text interface without ncurses\n"
+"   -L num              number of lines to print (0 for unlimited)\n"
+"                         (text interface default: 10 lines)\n"
+"                         (ncurses interface default: 50 lines)\n"
 "\n"
 "   Sorting orders:\n"
 "   -o 2s                Sort by first column (2s traffic average)\n"
@@ -213,7 +217,6 @@ static void usage(FILE *fp) {
 "\n"
 "   The following options are only available in combination with -t\n"
 "   -s num              print one single text output afer num seconds, then quit\n"
-"   -L num              number of lines to print\n"
 "\n"
 "iftop, version " PACKAGE_VERSION "\n"
 "copyright (c) 2002 Paul Warren <pdw@ex-parrot.com> and contributors\n", MAX_NETWORK_FILTER_NUM, NETWORK_FILTER_DELIMITERS
@@ -572,7 +575,8 @@ void options_make() {
     options_config_get_bool("link-local", &options.link_local);
     options_config_get_int("timed-output", &options.timed_output);
     options_config_get_bool("no-curses", &options.no_curses);
-    options_config_get_int("num-lines", &options.num_lines);
+    options_config_get_int("num-lines", &options.num_lines_curses);
+    options_config_get_int("num-lines", &options.num_lines_no_curses);
     options_config_get_net_filter();
     options_config_get_net_filter6();
 };
